@@ -5,10 +5,18 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/grid_view"
+        android:layout_gravity="top|center"
+        android:layout_width="match_parent"
+        android:background="@android:color/darker_gray"
+        android:layout_height="wrap_content" />
+
     <com.andexert.calendarlistview.library.DayPickerView
         android:id="@+id/pickerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/grid_view"
         calendar:drawRoundRect="false"
         calendar:currentDaySelected="false"/>
 

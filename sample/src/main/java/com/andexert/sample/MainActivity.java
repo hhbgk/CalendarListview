@@ -2,6 +2,8 @@ package com.andexert.sample;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,18 +11,43 @@ import android.view.MenuItem;
 import com.andexert.calendarlistview.library.DayPickerView;
 import com.andexert.calendarlistview.library.SimpleMonthAdapter;
 
+import java.text.DateFormatSymbols;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
+
 
 public class MainActivity extends Activity implements com.andexert.calendarlistview.library.DatePickerController {
-
+    private String tag = getClass().getSimpleName();
     private DayPickerView dayPickerView;
+    private int mNumDays = 7;
+    protected int mWeekStart = 1;
+    private DateFormatSymbols mDateFormatSymbols = new DateFormatSymbols();
+    private Calendar mDayLabelCalendar;
+    private RecyclerView mGridView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mGridView = (RecyclerView) findViewById(R.id.grid_view);
+        mGridView.setLayoutManager(new StaggeredGridLayoutManager(mNumDays, StaggeredGridLayoutManager.VERTICAL));
         dayPickerView = (DayPickerView) findViewById(R.id.pickerView);
         dayPickerView.setController(this);
+
+        List<String> list = new ArrayList<>();
+        mDayLabelCalendar = Calendar.getInstance();
+        for (int i = 0; i < mNumDays; i++) {
+            int calendarDay = (i + mWeekStart) % mNumDays;
+            mDayLabelCalendar.set(Calendar.DAY_OF_WEEK, calendarDay);
+            String s = mDateFormatSymbols.getShortWeekdays()[mDayLabelCalendar.get(Calendar.DAY_OF_WEEK)].toUpperCase(Locale.getDefault());
+            list.add(s);
+            Log.w(tag, "s="+s);
+        }
+        GridAdapter gridAdapter = new GridAdapter(this, list);
+        mGridView.setAdapter(gridAdapter);
     }
 
 

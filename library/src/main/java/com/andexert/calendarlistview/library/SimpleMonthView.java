@@ -177,7 +177,7 @@ class SimpleMonthView extends View
 	private void drawMonthTitle(Canvas canvas) {
         int x = (mWidth + 2 * mPadding) / 2;
         int y = (MONTH_HEADER_SIZE - MONTH_DAY_LABEL_TEXT_SIZE) / 2 + (MONTH_LABEL_TEXT_SIZE / 3);
-        StringBuilder stringBuilder = new StringBuilder(getMonthAndYearString().toLowerCase());
+        StringBuilder stringBuilder = new StringBuilder(getMonthString().toLowerCase());
         stringBuilder.setCharAt(0, Character.toUpperCase(stringBuilder.charAt(0)));
         canvas.drawText(stringBuilder.toString(), x, y, mMonthTitlePaint);
 	}
@@ -189,6 +189,13 @@ class SimpleMonthView extends View
 
 	private String getMonthAndYearString() {
         int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_NO_MONTH_DAY;
+        mStringBuilder.setLength(0);
+        long millis = mCalendar.getTimeInMillis();
+        return DateUtils.formatDateRange(getContext(), millis, millis, flags);
+    }
+
+    private String getMonthString() {
+        int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY;
         mStringBuilder.setLength(0);
         long millis = mCalendar.getTimeInMillis();
         return DateUtils.formatDateRange(getContext(), millis, millis, flags);
@@ -225,7 +232,7 @@ class SimpleMonthView extends View
                 else
                     canvas.drawCircle(x, y - MINI_DAY_NUMBER_TEXT_SIZE / 3, DAY_SELECTED_CIRCLE_SIZE, mSelectedCirclePaint);
             }
-            /*
+
             if (mHasToday && (mToday == day)) {
                 mMonthNumPaint.setColor(mCurrentDayTextColor);
                 mMonthNumPaint.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
@@ -279,7 +286,7 @@ class SimpleMonthView extends View
                 mMonthNumPaint.setColor(mPreviousDayColor);
                 mMonthNumPaint.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
             }
-*/
+
 			canvas.drawText(String.format(Locale.US, "%d", day), x, y, mMonthNumPaint);
             drawCircleProgress(canvas, x, y);
 
@@ -372,7 +379,7 @@ class SimpleMonthView extends View
 
 	protected void onDraw(Canvas canvas) {
 		drawMonthTitle(canvas);
-		drawMonthDayLabels(canvas);
+//		drawMonthDayLabels(canvas);
         drawMonthNumber(canvas);
 	}
 
