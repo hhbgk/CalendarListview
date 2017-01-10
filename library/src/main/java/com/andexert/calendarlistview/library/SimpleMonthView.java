@@ -208,7 +208,7 @@ class SimpleMonthView extends View
         return ((mYear < time.year)) || (mYear == time.year && mMonth < time.month) || ( mMonth == time.month && monthDay < time.monthDay);
     }
 
-	protected void drawMonthNums(Canvas canvas) {
+	protected void drawMonthNumber(Canvas canvas) {
 		int y = (mRowHeight + MINI_DAY_NUMBER_TEXT_SIZE) / 2 - DAY_SEPARATOR_WIDTH + MONTH_HEADER_SIZE;
 		int paddingDay = (mWidth - 2 * mPadding) / (2 * mNumDays);
 		int dayOffset = findDayOffset();
@@ -225,6 +225,7 @@ class SimpleMonthView extends View
                 else
                     canvas.drawCircle(x, y - MINI_DAY_NUMBER_TEXT_SIZE / 3, DAY_SELECTED_CIRCLE_SIZE, mSelectedCirclePaint);
             }
+            /*
             if (mHasToday && (mToday == day)) {
                 mMonthNumPaint.setColor(mCurrentDayTextColor);
                 mMonthNumPaint.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
@@ -278,8 +279,9 @@ class SimpleMonthView extends View
                 mMonthNumPaint.setColor(mPreviousDayColor);
                 mMonthNumPaint.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
             }
-
-			canvas.drawText(String.format("%d", day), x, y, mMonthNumPaint);
+*/
+			canvas.drawText(String.format(Locale.US, "%d", day), x, y, mMonthNumPaint);
+            drawCircleProgress(canvas, x, y);
 
 			dayOffset++;
 			if (dayOffset == mNumDays) {
@@ -289,6 +291,15 @@ class SimpleMonthView extends View
 			day++;
 		}
 	}
+
+    protected void drawCircleProgress(Canvas canvas, int x, int y){
+        float r = DAY_SELECTED_CIRCLE_SIZE+5;//Utils.sp2px(getResources(), DAY_SELECTED_CIRCLE_SIZE);
+        canvas.drawCircle(x, y - MINI_DAY_NUMBER_TEXT_SIZE / 3, r, unfinishedPaint);
+
+        RectF rectF = new RectF(x - r, (y  - MINI_DAY_NUMBER_TEXT_SIZE / 3) - r,
+                x + r, (y  - MINI_DAY_NUMBER_TEXT_SIZE / 3) + r);
+        canvas.drawArc(rectF, 0.0f, getProgressAngle(), false, finishedPaint);
+    }
 
 	public SimpleMonthAdapter.CalendarDay getDayFromLocation(float x, float y) {
 		int padding = mPadding;
@@ -345,13 +356,65 @@ class SimpleMonthView extends View
         mMonthNumPaint.setStyle(Style.FILL);
         mMonthNumPaint.setTextAlign(Align.CENTER);
         mMonthNumPaint.setFakeBoldText(false);
+
+        finishedPaint = new Paint();
+        finishedPaint.setColor(getResources().getColor(android.R.color.holo_blue_light));
+        finishedPaint.setStyle(Paint.Style.STROKE);
+        finishedPaint.setAntiAlias(true);
+        finishedPaint.setStrokeWidth(finishedStrokeWidth);
+
+        unfinishedPaint = new Paint();
+        unfinishedPaint.setColor(getResources().getColor(android.R.color.darker_gray));
+        unfinishedPaint.setStyle(Paint.Style.STROKE);
+        unfinishedPaint.setAntiAlias(true);
+        unfinishedPaint.setStrokeWidth(unfinishedStrokeWidth);
 	}
 
 	protected void onDraw(Canvas canvas) {
 		drawMonthTitle(canvas);
 		drawMonthDayLabels(canvas);
-		drawMonthNums(canvas);
+        drawMonthNumber(canvas);
 	}
+
+    private float finishedStrokeWidth = Utils.sp2px(getResources(), 2);
+    private float unfinishedStrokeWidth = Utils.sp2px(getResources(), 2);
+    private RectF finishedOuterRect = new RectF();
+    private RectF unfinishedOuterRect = new RectF();
+    private Paint finishedPaint;
+    private Paint unfinishedPaint;
+    private int max = (int) Utils.dp2px(getResources(), 100);
+    private float progress = (int) Utils.dp2px(getResources(), 20);
+    private int startingDegree ;//= (int) Utils.dp2px(getResources(), 50);
+    private float getProgressAngle() {
+        return getProgress() / (float) max * 360f;
+    }
+
+    public float getProgress() {
+        return progress;
+    }
+
+    public void setProgress(float progress) {
+        this.progress = progress;
+        if (this.progress > getMax()) {
+            this.progress %= getMax();
+        }
+        invalidate();
+    }
+
+    public int getMax() {
+        return max;
+    }
+
+    public void setMax(int max) {
+        if (max > 0) {
+            this.max = max;
+            invalidate();
+        }
+    }
+
+    public int getStartingDegree() {
+        return startingDegree;
+    }
 
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), mRowHeight * mNumRows + MONTH_HEADER_SIZE);
